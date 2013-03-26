@@ -24,6 +24,9 @@ class PathFinder {
     this.instruction=instructions;
     this.clen=instructions.split(".").length;
     this.cache=instructions.split(".");
+    for(int i=0;i<this.cache.length;i++){
+      print(cache[i]);
+    }
   }
   /**
    Return next coord (float[2]) and advance ic
@@ -66,6 +69,13 @@ class PathFinder {
     if (end)ic--; // return ic to previous state if needed
     return end;
   }
+
+  /**
+   Return to the first instruction
+   */
+  public void restart() {
+    this.ic=0;
+  }
 }
 
 /**
@@ -76,10 +86,52 @@ class PathFinder {
  * @author Wade Harkins <vdtdev@gmail.com>
  * @version 1.0.2013.02.14
  */
-class branch {
-  float p[]=new float[] {
+class Branch {
+  private float p[]=new float[] {
     0f, 0f, 0f, 0f
   };
-  final int x1=0, y1=1, x2=2, y2=3;
+  private float size=1.0f;
+  private final int x1=0, y1=1, x2=2, y2=3;
+  private PathFinder navi;
+  private int fg; // foreground color
+  /**
+   Branch constructor
+   @param floatx Starting X position
+   @param floaty Starting Y position
+   @param forecolor Foreground stroke color
+   @param strokeSize Stroke size
+   @param path Path instructions
+   */
+  public Branch(float startx, float starty, int forecolor, float strokeSize, String path) {
+    p[x1]=p[x2]=startx;
+    p[y1]=p[y2]=starty;
+    this.size=strokeSize;
+    fg=forecolor;
+    this.navi=new PathFinder(path);
+  }
+
+  public void render() {
+    pushStyle();
+
+    stroke(fg);
+    
+    print(p[x1] + "," + p[y1]);
+    
+    p[x2]=p[x1]; // copy old x
+    p[y2]=p[y1]; // copy old y
+
+    if (navi.atEnd()) navi.restart(); 
+    float v[] = this.navi.next();
+    
+    p[x1]+=v[0];
+    p[y1]+=v[1];
+    
+    p[x1]=Geom.wrap(p[x1],width);
+    p[y1]=Geom.wrap(p[y1],height);
+    
+    line(p[x2],p[y2],p[x1],p[y1]);
+    
+    popStyle();
+  }
 }
 
